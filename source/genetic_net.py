@@ -118,7 +118,8 @@ class Genetic:
             new_b_dna = bcopy[:cross_point] + acopy[cross_point:]
 
             for x in range(0, min_len):
-                new_a_dna[x] = new_a_dna, int(round((new_a_dna[x][1] + new_a_dna[x][1] + new_b_dna[x][1]) / 3))
+                if random.random() < .5:
+                    new_a_dna[x] = new_a_dna[x][0], int(round((new_a_dna[x][1] + new_a_dna[x][1] + new_b_dna[x][1]) / 3))
 
             return Individual(new_a_dna), Individual(new_b_dna)
         else:
