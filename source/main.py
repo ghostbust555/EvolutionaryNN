@@ -21,7 +21,7 @@ def as_python_object(dct):
         return pickle.loads(b64decode(dct['_python_object'].encode('utf-8')))
     return dct
 
-g = Genetic(15, 5)
+g = Genetic(25, 5)
 t = Thread(target=g.run)
 t.start()
 
@@ -29,7 +29,9 @@ class GeneticWebHost(object):
     @cherrypy.expose
     def getDna(self, id, uuid):
         if not g.workQueue.isEmpty():
-            x = dumps(g.workQueue.dequeue(), cls=PythonObjectEncoder)
+            toSend = g.workQueue.dequeue()
+            print("checking out DNA {0}".format(toSend.dna))
+            x = dumps(toSend, cls=PythonObjectEncoder)
             loads(x, object_hook=as_python_object)
             return x
         else:
@@ -38,6 +40,7 @@ class GeneticWebHost(object):
     @cherrypy.expose
     def dnaResult(self, result):
         x = loads(result, object_hook=as_python_object)
+        print("Received result {0}".format(x.score))
         g.results.append(x)
         return "Ok"
 

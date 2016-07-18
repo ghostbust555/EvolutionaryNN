@@ -12,6 +12,10 @@ class Individual:
         else:
             r = random.randrange(2, 10)
             self.dna = [LayerType.random_layer() for _ in range(r)]
+            self.dna.append(LayerType.loss_layer())
 
-    def get_fitness(self):
-        return self.score
+        pass
+
+    def get_network(self):
+        for x in self.dna:
+            print(x[0].name, end=" ")

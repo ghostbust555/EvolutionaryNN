@@ -4,6 +4,7 @@ from itertools import chain
 
 from individual import Individual
 from geneticqueue import GeneticQueue
+from layertype import LayerType, Loss
 
 
 def process_input(x):
@@ -92,16 +93,20 @@ class Genetic:
 
     @staticmethod
     def mutate(seed: Individual):
+
+        from layertype import LayerType
         y = [None] * len(seed.dna)
 
         # loop through and mutate randomly
         for idx, x in enumerate(seed.dna):
-            r = random.random()
-            if r < .02:
-                from layertype import LayerType
-                y[idx] = LayerType.random_layer()
-            elif r < .2:
-                y[idx] = x[0], max(1, int(random.gauss(x[1], 100)))
+            if x[0] != LayerType.loss:
+                r = random.random()
+                if r < .02:
+                    y[idx] = LayerType.random_layer()
+                elif r < .2:
+                    y[idx] = x[0], max(1, int(random.gauss(x[1], 100)))
+                else:
+                    y[idx] = x
             else:
                 y[idx] = x
 
@@ -109,18 +114,20 @@ class Genetic:
         r = random.random()
         if r < .02:
             from layertype import LayerType
-            y.append(LayerType.random_layer())
+            y = [LayerType.random_layer()]+y
         elif r < .04:
-            del y[-1]
+            del y[random.randrange(0, max(len(y) - 2, 1))]
 
         seed.dna = y
         return seed
 
     @staticmethod
     def mate(a: Individual, b: Individual):
-        if random.random() < .9:
-            min_len = (min(len(a.dna), len(b.dna)))
-            cross_point = random.randrange(1, min_len)
+
+        min_len = (min(len(a.dna), len(b.dna)))
+
+        if min_len > 2 and random.random() < .9:
+            cross_point = random.randrange(1, min_len - 1)
 
             acopy = []
             bcopy = []
@@ -135,8 +142,10 @@ class Genetic:
             new_b_dna = bcopy[:cross_point] + acopy[cross_point:]
 
             for x in range(0, min_len):
-                if random.random() < .5:
+                if new_a_dna[x][0] != LayerType.loss and new_b_dna[x][0] != LayerType.loss and random.random() < .5:
                     new_a_dna[x] = new_a_dna[x][0], int(round((new_a_dna[x][1] + new_a_dna[x][1] + new_b_dna[x][1]) / 3))
+                elif new_a_dna[x][0] == LayerType.loss and random.random() < .5:
+                    new_a_dna[x] = new_a_dna[x][0], Loss.random_loss()
 
             return Individual(new_a_dna), Individual(new_b_dna)
         else:
@@ -156,7 +165,7 @@ class Genetic:
         if epoch > 0 and epoch % self.extinction_event == 0:
             print("Extinction Event...")
 
-            keep = int(self.init_pop_size * .8)
+            keep = int(self.init_pop_size * .7)
             new_pop = self.init_pop_size - keep
 
             self.population = self.population[:keep]

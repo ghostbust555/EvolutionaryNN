@@ -1,4 +1,4 @@
-from genetic_net import Genetic
+from genetic import Genetic
 from individual import Individual
 
 
@@ -20,19 +20,23 @@ from individual import Individual
 #                                                np_end-np_start, t_end-t_start))
 #     print("Result difference: %f" % (np.abs(AB-tAB).max(), ))
 #
-# def test_mutate():
-#     g = Genetic()
-#     i = Individual()
-#     o = g.mutate(i)
-#     print(o.dna)
-#     assert not o.dna.__contains__(None)
+
+def test_mutate():
+    g = Genetic()
+    for i in range(100):
+        a = Individual()
+
+        o = g.mutate(a)
+        assert not o.dna.__contains__(None)
 
 
 def test_mate():
     g = Genetic()
-    a = Individual()
-    b = Individual()
+    for i in range(100):
+        a = Individual()
+        b = Individual()
 
-    o = g.mate(a, b)
-    assert not o[0].dna.__contains__(None)
+        o = g.mate(a, b)
+        assert not o[0].dna.__contains__(None)
+        assert not o[1].dna.__contains__(None)
 
